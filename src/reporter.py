@@ -1,3 +1,17 @@
+import os
+import io
+import base64
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import textwrap
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.patches import FancyBboxPatch
+from matplotlib.ticker import FuncFormatter
+from openai import OpenAI
+
+
 def generate_client_report(
     client_id,
     master_df,
@@ -69,7 +83,11 @@ def generate_client_report(
     hhi = (holdings/holdings.sum()).pow(2).sum() if holdings.sum()>0 else np.nan
 
     if not output_path:
-        output_path = f"client_report_{client_id}.pdf"
+        # Default output path inside 'client_reports' folder in the project root
+        reports_dir = os.path.join(os.getcwd(), "client_reports")
+        os.makedirs(reports_dir, exist_ok=True)
+        output_path = os.path.join(reports_dir, f"client_report_{client_id}.pdf")
+
 
     def analyze_and_embed(fig, prompt_text="Please analyze this chart and provide insights."):
         # Always use standardized size
