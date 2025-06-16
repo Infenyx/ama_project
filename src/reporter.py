@@ -11,6 +11,14 @@ from matplotlib.patches import FancyBboxPatch
 from matplotlib.ticker import FuncFormatter
 from openai import OpenAI
 
+import os
+from dotenv import load_dotenv
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(base_dir, "..", ".env")
+load_dotenv(dotenv_path=env_path)
+
+
 
 def generate_client_report(
     client_id,
@@ -83,10 +91,13 @@ def generate_client_report(
     hhi = (holdings/holdings.sum()).pow(2).sum() if holdings.sum()>0 else np.nan
 
     if not output_path:
-        # Default output path inside 'client_reports' folder in the project root
-        reports_dir = os.path.join(os.getcwd(), "client_reports")
+        # Always resolve relative to this script's location (e.g., /src/)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        reports_dir = os.path.join(base_dir, "..", "client_reports")
         os.makedirs(reports_dir, exist_ok=True)
         output_path = os.path.join(reports_dir, f"client_report_{client_id}.pdf")
+        output_path = os.path.normpath(output_path)  # Clean up ".."
+
 
 
     def analyze_and_embed(fig, prompt_text="Please analyze this chart and provide insights."):
